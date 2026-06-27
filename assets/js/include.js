@@ -2,30 +2,66 @@
   'use strict';
 
   const content = document.getElementById('content');
-  const main = document.querySelector('.main');
+
+  function getMain() {
+    return document.querySelector('main');
+  }
+
+  function updatePageHeader(page) {
+    const title = document.getElementById('pageTitle');
+    if (!title) return;
+
+    title.textContent =
+      page.charAt(0).toUpperCase() +
+      page.slice(1).toLowerCase();
+  }
 
   function getCurrentPageFromPath() {
+    const hash = location.hash.replace('#', '').toLowerCase();
+
+    if (hash) {
+      return hash;
+    }
     let path = location.pathname.replace(/^\/+/, '').replace(/\/$/, '');
-    if (!path || path === 'index.html') return 'home';
+
+    if (!path || path === 'index.html') {
+      return 'home';
+    }
+
     return path.split('/')[0].toLowerCase();
   }
 
   function getRouteFromPath() {
+
+    // Page navigation uses hashes (#Home, #Products...)
+    const hash = location.hash.replace('#', '').toLowerCase();
+
+    if (
+      hash &&
+      ['home', 'products', 'contacts', 'about', 'more'].includes(hash)
+    ) {
+      return {
+        page: hash,
+        sectionId: ''
+      };
+    }
+
+    // Product section URLs (/products/item)
     let path = location.pathname.replace(/^\/+/, '').replace(/\/$/, '');
 
     if (!path || path === 'index.html') {
-      return { page: 'home', sectionId: '' };
+      return {
+        page: 'home',
+        sectionId: ''
+      };
     }
 
     const parts = path.split('/');
-    const page = (parts[0] || 'home').toLowerCase();
-    const sectionId = (parts[1] || '').toLowerCase();
 
-    if (!/^[a-zA-Z0-9\-]+$/.test(page)) {
-      return { page: 'home', sectionId: '' };
-    }
-
-    return { page, sectionId };
+    return {
+      page: (parts[0] || 'home').toLowerCase(),
+      sectionId: (parts[1] || '').toLowerCase()
+    };
   }
 
   function setCanonical(pageName) {
@@ -59,17 +95,26 @@
       }
 
       const html = await res.text();
+
       content.innerHTML = html;
+
+      updatePageHeader(pageName);
 
       if (typeof loadFeaturedProjects === 'function') {
         loadFeaturedProjects();
       }
 
+      const main = getMain();
+
       if (main) {
-        main.scrollTo({ top: 0, behavior: 'auto' });
+        main.scrollTo({
+          top: 0,
+          behavior: 'auto'
+        });
       }
 
       setCanonical(pageName);
+
       return pageName;
     } catch (err) {
       content.innerHTML = `
@@ -77,14 +122,20 @@
           Could not load "${file}" - ${err.message}
         </div>
       `;
+
+      updatePageHeader(pageName);
+
       return pageName;
     }
   }
 
   function scrollToSection(id) {
+    const main = getMain();
+
     if (!main) return;
 
     const section = document.getElementById(id);
+
     if (!section) return;
 
     main.scrollTo({
@@ -96,50 +147,75 @@
   function updateActiveNav(page) {
     const currentPage = (page || 'home').toLowerCase();
 
-    document.querySelectorAll('[data-page]').forEach(el => {
-      el.classList.toggle(
+    document.querySelectorAll('[data-page]').forEach(link => {
+      link.classList.toggle(
         'active',
-        (el.dataset.page || '').toLowerCase() === currentPage
+        (link.dataset.page || '').toLowerCase() === currentPage
       );
     });
   }
 
   function navigateTo(page, section = '') {
+
     const pageName = (page || 'home').toLowerCase();
     const sectionName = (section || '').toLowerCase();
 
-    const path = sectionName
-      ? `/${pageName}/${sectionName}`
-      : `/${pageName}`;
+    // Product sections still use path routing
+    if (sectionName) {
 
-    history.pushState({ page: pageName, section: sectionName }, '', path);
+      history.pushState(
+        {
+          page: pageName,
+          section: sectionName
+        },
+        '',
+        `/products/${sectionName}`
+      );
+
+    } else {
+
+      // Pages use hash routing
+      history.pushState(
+        {
+          page: pageName,
+          section: ''
+        },
+        '',
+        `#${pageName}`
+      );
+
+    }
+
     router();
   }
 
   async function router() {
     const { page, sectionId } = getRouteFromPath();
+
     const loadedPage = await loadPage(page);
 
-    if (sectionId && loadedPage === 'services') {
+    updateActiveNav(loadedPage);
+
+    if (sectionId && loadedPage === 'products') {
       requestAnimationFrame(() => scrollToSection(sectionId));
     }
-
-    updateActiveNav(loadedPage);
   }
 
   function initNavigation() {
     document.addEventListener('click', e => {
       const pageLink = e.target.closest('[data-page]');
+
       if (pageLink) {
         e.preventDefault();
 
-        const page = pageLink.dataset.page;
-        const section = pageLink.dataset.section || '';
-
-        navigateTo(page, section);
+        navigateTo(
+          pageLink.dataset.page,
+          pageLink.dataset.section || ''
+        );
 
         const menu = document.getElementById('mobileMenu');
-        if (menu?.classList.contains('show')) {
+
+        if (menu && menu.classList.contains('show')) {
           bootstrap.Collapse.getInstance(menu)?.hide();
         }
 
@@ -147,52 +223,69 @@
       }
 
       const tagLink = e.target.closest('a[href^="#"]');
-      if (tagLink) {
-        const id = tagLink.getAttribute('href').replace('#', '');
-        if (!id) return;
 
-        e.preventDefault();
+      if (!tagLink) return;
 
-        const currentPage = getCurrentPageFromPath();
+      const id = tagLink.getAttribute('href').replace('#', '');
 
-        if (currentPage !== 'services') {
-          history.pushState(
-            { page: 'services', section: id },
-            '',
-            `/services/${id}`
-          );
-          router();
-        } else {
-          history.replaceState(
-            { page: 'services', section: id },
-            '',
-            `/services/${id}`
-          );
-          scrollToSection(id);
-        }
+      if (!id) return;
 
-        document.querySelectorAll('.tag-link').forEach(el => {
-          el.classList.remove('active');
-        });
+      e.preventDefault();
 
-        tagLink.classList.add('active');
+      const currentPage = getCurrentPageFromPath();
+
+      if (currentPage !== 'products') {
+        history.pushState(
+          {
+            page: 'products',
+            section: id
+          },
+          '',
+          `/products/${id}`
+        );
+
+        router();
+      } else {
+        history.replaceState(
+          {
+            page: 'products',
+            section: id
+          },
+          '',
+          `/products/${id}`
+        );
+
+        scrollToSection(id);
       }
+
+      document.querySelectorAll('.tag-link').forEach(link => {
+        link.classList.remove('active');
+      });
+
+      tagLink.classList.add('active');
     });
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     const redirectPath = params.get('r');
 
     if (redirectPath) {
       params.delete('r');
+
       const newSearch = params.toString();
-      const newUrl = redirectPath + (newSearch ? `?${newSearch}` : '');
-      history.replaceState(null, '', newUrl);
+
+      history.replaceState(
+        null,
+        '',
+        redirectPath + (newSearch ? `?${newSearch}` : '')
+      );
     }
 
     initNavigation();
     router();
+
     window.addEventListener('popstate', router);
   });
+
 })();

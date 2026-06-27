@@ -4,7 +4,7 @@ body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background:white;
+    background: white;
    
 }
 
@@ -98,7 +98,7 @@ html {
 
 #cardiop {
     font-size: 1.5rem;
-    color:  #880808 !important;
+    color: white !important;
 }
 
 
@@ -128,6 +128,14 @@ html {
     padding : 1rem;
 }
 
+.page-container h1{
+  margin:0;
+  color:#880808!important;
+  font-size:2rem;
+  font-weight:700;
+}
+
+
 @media (max-width: 576px) {
     .page-container {
         padding-left: 1rem;
@@ -148,7 +156,7 @@ html {
 .page-header h1{
   margin:0;
   color:#880808!important;
-  font-size:3rem;
+  font-size:2rem;
   font-weight:700;
 }
 
@@ -169,7 +177,7 @@ html {
 }
 
 .page-header .social-links a:hover{
-  color:#555;
+  color:black;
 }
 
 .page-section{
@@ -178,9 +186,9 @@ html {
 
 /* Section header - h3 with icon and consistent styling */
 .section-title {
-    font-size: 1.75rem;
+    font-size: 1.8rem;
     font-weight: 700;
-    color:black;
+    color:#880808!important;
     text-align: left;
     margin-bottom: 1rem;
 }
@@ -200,8 +208,9 @@ html {
 
 .card {
   border-radius: 0.5rem;
-  background: #800808;
-  color: white;
+  border: 1px solid #880808;
+  background: white;
+  color: black;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -269,84 +278,63 @@ html {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  min-height: clamp(380px, 60vh, 560px);
+  min-height: clamp(340px, 48vh, 480px);
   padding: clamp(1rem, 4vw, 3rem);
   margin-bottom: 2rem;
   color: #fff;
   background: url("../media/Hero.png") center center / cover no-repeat;
   overflow: hidden;
+  border: 1px solid #880808;
 }
 
-.hero-content {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 100%;
+/* Minimalistic Scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #880808 transparent;
 }
 
-.hero-card {
-  display: inline-block;
-  width: fit-content;
-  max-width: 100%;
-  padding: clamp(1rem, 3vw, 2rem) clamp(1.25rem, 4vw, 2.5rem);
-  border-radius: 18px;
-  background: rgba(0, 0, 0, 0.6);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
 }
 
-.hero-artistic {
-  margin: 0;
-  font-family: "Cinzel Decorative", serif;
-  font-size: clamp(1.8rem, 7vw, 5rem);
-  font-weight: 700;
-  line-height: 0.95;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  text-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-.hero-artistic + .hero-artistic {
-  margin-top: 0.2em;
+::-webkit-scrollbar-thumb {
+    background: #880808;
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
 }
 
-@media (max-width: 768px) {
-  .hero-section {
-    min-height: clamp(320px, 55vh, 460px);
-    align-items: flex-end;
-    padding: 1.5rem;
-    background-position: left center;
-  }
-
-  .hero-content {
-    display: flex;
-    justify-content: flex-start;
-  }
-
-  .hero-card {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .hero-artistic {
-    font-size: clamp(1.6rem, 11vw, 3rem);
-    letter-spacing: 0.04em;
-  }
+::-webkit-scrollbar-thumb:hover {
+    background: #222;
+    background-clip: padding-box;
 }
 
-@media (max-width: 480px) {
-  .hero-section {
-    padding: 1rem;
-    min-height: 300px;
-  }
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
 
-  .hero-card {
-    padding: 1rem 1.1rem;
-    border-radius: 14px;
-  }
 
-  .hero-artistic {
-    line-height: 1;
-  }
+/* Enhanced button styles for homepage */
+.btn-primary-custom {
+    transition: all 0.3s ease;
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.hero-section{
+    position: relative;
+}
+
+.hero-buttons{
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
 }
