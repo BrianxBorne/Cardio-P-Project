@@ -60,6 +60,46 @@
     return pathname.endsWith('/') ? pathname : pathname + '/';
   }
 
+  /**
+   * ESTABLISH BASE URL FOR ASSET RESOLUTION
+   * 
+   * This function sets up a <base> element in the document head
+   * that tells the browser how to resolve relative URLs for assets
+   * (images, stylesheets, fonts, etc.).
+   * 
+   * Without a <base> element, the browser resolves relative URLs
+   * against the current location.href, which can become unstable
+   * after SPA navigation. This is especially problematic when:
+   * - Pages are dynamically injected via innerHTML
+   * - The application runs from a GitHub Pages subdirectory
+   * - history.pushState changes the location
+   * 
+   * Solution: Set <base href> to the application's base path.
+   * This ensures ALL relative URLs resolve against the correct base,
+   * regardless of the current history state or injected HTML source.
+   * 
+   * This is the standard SPA approach used by Angular, React, etc.
+   */
+  function setBaseURL() {
+    const basePath = getBasePath();
+    
+    // Ensure base path has trailing slash (required for relative URL resolution)
+    const baseURL = basePath.endsWith('/') ? basePath : basePath + '/';
+    
+    // Check if <base> element already exists
+    let baseElement = document.querySelector('base');
+    
+    if (!baseElement) {
+      // Create and insert <base> element
+      baseElement = document.createElement('base');
+      document.head.insertBefore(baseElement, document.head.firstChild);
+    }
+    
+    // Set the href to the application's base path
+    // This tells the browser to resolve all relative URLs against this URL
+    baseElement.href = location.origin + baseURL;
+  }
+
   function getMain() {
     return document.querySelector('main');
   }
@@ -372,6 +412,10 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    // FIRST: Establish the base URL for all relative asset resolution
+    // This must happen before any page loading or navigation
+    setBaseURL();
+
     const params = new URLSearchParams(location.search);
     const redirectPath = params.get('r');
 
